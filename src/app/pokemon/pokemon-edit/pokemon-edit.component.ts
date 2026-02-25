@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PokemonService } from '../../pokemon.service';
@@ -15,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-pokemon-edit',
   standalone: true,
-  imports: [DatePipe, RouterLink, ReactiveFormsModule],
+  imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './pokemon-edit.component.html',
   styles: ``,
 })
@@ -23,15 +22,13 @@ export class PokemonEditComponent {
   readonly route = inject(ActivatedRoute);
   readonly router = inject(Router);
   readonly pokemonService = inject(PokemonService);
-  readonly pokemonId = Number(this.route.snapshot.paramMap.get('id'));
-  readonly pokemon = toSignal(
-    this.pokemonService.getPokemonById(this.pokemonId),
-  );
+  readonly pokemonId = signal(Number(this.route.snapshot.paramMap.get('id')));
+  readonly pokemonResource = this.pokemonService.getPokemonById(this.pokemonId);
   readonly POKEMON_RULES = signal(POKEMON_RULES).asReadonly();
 
   constructor() {
     effect(() => {
-      const pokemon = this.pokemon();
+      const pokemon = this.pokemonResource.value();
 
       if (pokemon) {
         this.form.patchValue({
@@ -40,7 +37,7 @@ export class PokemonEditComponent {
           damage: pokemon.damage,
         });
 
-        pokemon.types.forEach((type) => {
+        pokemon.types.forEach((type: string) => {
           this.pokemonTypeList.push(new FormControl(type));
         });
       }
@@ -88,16 +85,21 @@ export class PokemonEditComponent {
   }
 
   onSubmit() {
-    const isFormValid = this.form.valid;
-    const pokemon = this.pokemon();
+    Object.values(this.form.controls).forEach(control => control.markAsDirty());
 
-    if (isFormValid && pokemon) {
+    if (this.form.invalid) {
+      return;
+    }
+
+    const pokemon = this.pokemonResource.value();
+
+    if (pokemon) {
       const updatedPokemon: Pokemon = {
         ...pokemon,
         name: this.pokemonName.value as string,
         life: this.pokemonLife.value,
         damage: this.pokemonDamage.value,
-        types: this.pokemonTypeList.value,
+        types: this.pokemonTypeList.value as [string] | [string, string] | [string, string, string],
       };
 
       this.pokemonService.updatePokemon(updatedPokemon).subscribe(() => {

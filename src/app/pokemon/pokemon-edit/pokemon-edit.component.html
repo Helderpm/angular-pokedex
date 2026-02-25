@@ -1,4 +1,4 @@
-@if(pokemon(); as pokemon) {
+@if(pokemonResource.value(); as pokemon) {
 <div class="container mt-5">
   <div class="card">
     <div class="row g-0">
@@ -7,8 +7,8 @@
       >
         <img
           [src]="pokemon.picture"
-          class="img-fluid rounded-start"
           [alt]="pokemon.name"
+          class="img-fluid rounded-start"
         />
       </div>
       <div class="col-md-8">

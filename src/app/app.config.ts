@@ -11,12 +11,11 @@ import { PokemonAddComponent } from './pokemon/pokemon-add/pokemon-add.component
 import { PokemonService } from './pokemon.service';
 import { PokemonJSONServerService } from './pokemon-json-server.service';
 import { PokemonLocalStorageService } from './pokemon-local-storage.service';
-import { environment } from '../environments/environment';
+//import { environment } from '../environments/environment';
 
 export function pokemonServiceFactory(): PokemonService {
-  return environment.production
-    ? new PokemonLocalStorageService()
-    : new PokemonJSONServerService();
+  return new PokemonLocalStorageService();
+  //return new PokemonJSONServerService();
 }
 
 const routes: Routes = [
@@ -27,7 +26,7 @@ const routes: Routes = [
   },
   {
     path: 'pokemons',
-    canActivate: [AuthGuard],
+    //canActivate: [AuthGuard],
     children: [
       {
         path: '',

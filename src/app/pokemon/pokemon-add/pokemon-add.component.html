@@ -6,8 +6,8 @@
         >
           <img
             [src]="pokemonPicture.value"
-            class="img-fluid rounded-start"
             [alt]="pokemonName.value"
+            class="img-fluid rounded-start"
           />
         </div>
         <div class="col-md-8">
@@ -72,6 +72,7 @@
                     <th scope="row">Points de vie</th>
                     <td>
                       <div class="input-group">
+                        <span class="input-group-text" id="life-label">Points de vie</span>
                         <button
                           type="button"
                           class="btn btn-outline-secondary"
@@ -79,6 +80,7 @@
                             pokemonLife.value <= POKEMON_RULES().MIN_LIFE
                           "
                           (click)="decrementLife()"
+                          aria-label="Diminuer les points de vie"
                         >
                           -
                         </button>
@@ -87,6 +89,7 @@
                           class="form-control text-center"
                           formControlName="life"
                           readonly
+                          aria-labelledby="life-label"
                         />
                         <button
                           type="button"
@@ -95,6 +98,7 @@
                             pokemonLife.value >= POKEMON_RULES().MAX_LIFE
                           "
                           (click)="incrementLife()"
+                          aria-label="Augmenter les points de vie"
                         >
                           +
                         </button>
@@ -105,6 +109,7 @@
                     <th scope="row">Dégâts</th>
                     <td>
                       <div class="input-group">
+                        <span class="input-group-text" id="damage-label">Dégâts</span>
                         <button
                           type="button"
                           class="btn btn-outline-secondary"
@@ -112,6 +117,7 @@
                             pokemonDamage.value <= POKEMON_RULES().MIN_DAMAGE
                           "
                           (click)="decrementDamage()"
+                          aria-label="Diminuer les dégâts"
                         >
                           -
                         </button>
@@ -120,6 +126,7 @@
                           formControlName="damage"
                           class="form-control text-center"
                           readonly
+                          aria-labelledby="damage-label"
                         />
                         <button
                           type="button"
@@ -128,6 +135,7 @@
                             pokemonDamage.value >= POKEMON_RULES().MAX_DAMAGE
                           "
                           (click)="incrementDamage()"
+                          aria-label="Augmenter les dégâts"
                         >
                           +
                         </button>

@@ -1,9 +1,20 @@
+import { Injectable, Signal, signal } from '@angular/core';
+import { HttpResourceRef } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Pokemon, PokemonList } from './pokemon.model';
 import { PokemonService } from './pokemon.service';
 
+@Injectable({
+  providedIn: 'root'
+})
 export class PokemonLocalStorageService implements PokemonService {
   private localStorageKey = 'pokemons';
+  private pokemonListSignal = signal<PokemonList>([]);
+
+  constructor() {
+    this.initializePokemons();
+    this.loadPokemons();
+  }
 
   // Initialise les données dans le localStorage si elles n'existent pas encore.
   private initializePokemons(): void {
@@ -140,7 +151,6 @@ export class PokemonLocalStorageService implements PokemonService {
 
   // Récupère la liste des Pokémons depuis le localStorage.
   private getPokemonsFromStorage(): Pokemon[] {
-    this.initializePokemons();
     const pokemons = localStorage.getItem(this.localStorageKey);
     return pokemons ? JSON.parse(pokemons) : [];
   }
@@ -148,19 +158,33 @@ export class PokemonLocalStorageService implements PokemonService {
   // Sauvegarde la liste des Pokémons dans le localStorage.
   private savePokemonsToStorage(pokemons: Pokemon[]): void {
     localStorage.setItem(this.localStorageKey, JSON.stringify(pokemons));
+    this.pokemonListSignal.set(pokemons);
+  }
+
+  // Charge les pokémons dans le signal
+  private loadPokemons(): void {
+    const pokemons = this.getPokemonsFromStorage();
+    this.pokemonListSignal.set(pokemons);
   }
 
   // Retourne la liste de tous les Pokémons.
-  getPokemonList(): Observable<PokemonList> {
-    const pokemons = this.getPokemonsFromStorage();
-    return of(pokemons);
+  getPokemonList(): HttpResourceRef<PokemonList> {
+    return {
+      value: () => this.pokemonListSignal(),
+      hasValue: () => true,
+      isLoading: () => false,
+      error: () => null
+    } as unknown as HttpResourceRef<PokemonList>;
   }
 
   // Retourne le pokémon avec l'identifiant passé en paramètre.
-  getPokemonById(id: number): Observable<Pokemon> {
-    const pokemons = this.getPokemonsFromStorage();
-    const pokemon = pokemons.find((p) => p.id === id);
-    return of(pokemon!); // Utilise '!' car le pokémon existe toujours.
+  getPokemonById(id: Signal<number>): HttpResourceRef<Pokemon | undefined> {
+    return {
+      value: () => this.pokemonListSignal().find(p => p.id === id()),
+      hasValue: () => !!this.pokemonListSignal().find(p => p.id === id()),
+      isLoading: () => false,
+      error: () => null
+    } as unknown as HttpResourceRef<Pokemon | undefined>;
   }
 
   // Met à jour un pokémon existant.
@@ -198,6 +222,7 @@ export class PokemonLocalStorageService implements PokemonService {
   resetPokemonList(): Observable<void> {
     localStorage.removeItem(this.localStorageKey);
     this.initializePokemons();
+    this.loadPokemons();
     return of(void 0);
   }
 

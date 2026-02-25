@@ -41,7 +41,7 @@ export class PokemonAddComponent {
       picture: this.pokemonPicture.value,
       life: this.pokemonLife.value,
       damage: this.pokemonDamage.value,
-      types: this.pokemonTypeList.controls.map(control => control.value) as [string, string?, string?],
+      types: this.pokemonTypeList.controls.map(control => control.value) as [string] | [string ,string ] | [string, string, string],
       created: new Date()
     };
 
